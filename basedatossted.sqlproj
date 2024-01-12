@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>basedatossted</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{24197c24-a7e3-4248-a218-cecb646c2b57}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql150DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>basedatossted</RootNamespace>
+    <AssemblyName>basedatossted</AssemblyName>
+    <ModelCollation>1033,CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CI_AS</DefaultCollation>
+    <DefaultFilegroup>PRIMARY</DefaultFilegroup>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="dbo\" />
+    <Folder Include="dbo\Tables\" />
+    <Folder Include="dbo\Views\" />
+    <Folder Include="dbo\Functions\" />
+    <Folder Include="dbo\Stored Procedures\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="dbo\Tables\tbl_Vehiculo.sql" />
+    <Build Include="dbo\Tables\tbl_VehiculoOperador.sql" />
+    <Build Include="dbo\Tables\tbl_Zona.sql" />
+    <Build Include="dbo\Tables\tbl_ZonaSted.sql" />
+    <Build Include="dbo\Tables\__EFMigrationsHistory.sql" />
+    <Build Include="dbo\Tables\AspNetRoleClaims.sql" />
+    <Build Include="dbo\Tables\AspNetRoles.sql" />
+    <Build Include="dbo\Tables\AspNetUserClaims.sql" />
+    <Build Include="dbo\Tables\AspNetUserLogins.sql" />
+    <Build Include="dbo\Tables\AspNetUserRoles.sql" />
+    <Build Include="dbo\Tables\AspNetUsers.sql" />
+    <Build Include="dbo\Tables\AspNetUserTokens.sql" />
+    <Build Include="dbo\Tables\AuditLogs.sql" />
+    <Build Include="dbo\Tables\tbl_AsignacionTarjeta.sql" />
+    <Build Include="dbo\Tables\tbl_CatalogoBancos.sql" />
+    <Build Include="dbo\Tables\tbl_CatalogoDias.sql" />
+    <Build Include="dbo\Tables\tbl_CatalogoEstado.sql" />
+    <Build Include="dbo\Tables\tbl_CatalogoMunicipio.sql" />
+    <Build Include="dbo\Tables\tbl_CatalogoTipoVehiculo.sql" />
+    <Build Include="dbo\Tables\tbl_CatalogoVehiculoMarca.sql" />
+    <Build Include="dbo\Tables\tbl_CatalogoVehiculoModelo.sql" />
+    <Build Include="dbo\Tables\tbl_CheckIn_CheckOut.sql" />
+    <Build Include="dbo\Tables\tbl_Cliente.sql" />
+    <Build Include="dbo\Tables\tbl_ContactoCliente.sql" />
+    <Build Include="dbo\Tables\tbl_CoordinadorCliente.sql" />
+    <Build Include="dbo\Tables\tbl_DetallePlanificacion.sql" />
+    <Build Include="dbo\Tables\tbl_DetalleTarjeta.sql" />
+    <Build Include="dbo\Tables\tbl_DirectorSubDirector.sql" />
+    <Build Include="dbo\Tables\tbl_EjecucionPlanificacion.sql" />
+    <Build Include="dbo\Tables\tbl_EmpleadoCoordinador.sql" />
+    <Build Include="dbo\Tables\tbl_EmpleadoCuentaBancaria.sql" />
+    <Build Include="dbo\Tables\tbl_Empleados.sql" />
+    <Build Include="dbo\Tables\tbl_Formato.sql" />
+    <Build Include="dbo\Tables\tbl_FormatoCliente.sql" />
+    <Build Include="dbo\Tables\tbl_GerenteSubGerente.sql" />
+    <Build Include="dbo\Tables\tbl_Horario.sql" />
+    <Build Include="dbo\Tables\tbl_HorarioEmpleado.sql" />
+    <Build Include="dbo\Tables\tbl_MunicipioCliente.sql" />
+    <Build Include="dbo\Tables\tbl_Planificacion.sql" />
+    <Build Include="dbo\Tables\tbl_SubDirectorCoordinador.sql" />
+    <Build Include="dbo\Tables\tbl_TarifasTipoVehiculo.sql" />
+    <Build Include="dbo\Tables\tbl_Tienda.sql" />
+    <Build Include="dbo\Tables\tbl_TiendaCoordinador.sql" />
+    <Build Include="dbo\Tables\tbl_ValidateUserAccount.sql" />
+    <Build Include="dbo\Views\vw_Productividad.sql" />
+    <Build Include="dbo\Functions\funStrCptr.sql" />
+    <Build Include="dbo\Functions\funStrLong.sql" />
+    <Build Include="dbo\Functions\funStrInt.sql" />
+    <Build Include="dbo\Functions\funStr.sql" />
+    <Build Include="dbo\Functions\funFechaStr.sql" />
+    <Build Include="dbo\Stored Procedures\CalculoNominaProductividadResp.sql" />
+    <Build Include="dbo\Stored Procedures\PlanificacionDetalleGetByParameter.sql" />
+    <Build Include="dbo\Stored Procedures\ProductividadGetById.sql" />
+    <Build Include="dbo\Stored Procedures\ProductividadGetByOperador.sql" />
+    <Build Include="dbo\Stored Procedures\TiendasGetByParameter.sql" />
+    <Build Include="dbo\Stored Procedures\PlanificacionGetByCoordinador.sql" />
+    <Build Include="dbo\Stored Procedures\CalculoNominaProductividad.sql" />
+    <Build Include="dbo\Stored Procedures\ReporteImporteCombustibleAsignado.sql" />
+    <Build Include="dbo\Stored Procedures\ReporteVehiculosExtraUtilizados.sql" />
+  </ItemGroup>
+</Project>

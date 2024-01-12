@@ -1,0 +1,93 @@
+12/01/2024 12:31:59 p. m.	Este registro contiene información acerca de la operación de importación de esquema en el proyecto 'basedatossted' del equipo 'MOCBANA' por el usuario 'mocba'.
+12/01/2024 12:31:59 p. m.	Se inició la importación del esquema de la base de datos.
+12/01/2024 12:32:00 p. m.	Recopilando credenciales de la base de datos
+12/01/2024 12:32:00 p. m.	Recopilando opciones de base de datos
+12/01/2024 12:32:00 p. m.	Recopilando la opción de configuración de ámbito de la base de datos genérica
+12/01/2024 12:32:00 p. m.	Recopilando usuarios
+12/01/2024 12:32:00 p. m.	Recopilando roles
+12/01/2024 12:32:00 p. m.	Recopilando roles de aplicación
+12/01/2024 12:32:00 p. m.	Recopilando pertenencias a roles
+12/01/2024 12:32:00 p. m.	Recopilando grupos de archivos
+12/01/2024 12:32:00 p. m.	Recopilando catálogos de texto completo
+12/01/2024 12:32:00 p. m.	Recopilando ensamblados
+12/01/2024 12:32:00 p. m.	Recopilando certificados
+12/01/2024 12:32:00 p. m.	Recopilando claves asimétricas
+12/01/2024 12:32:00 p. m.	Recopilando claves simétricas
+12/01/2024 12:32:00 p. m.	Recopilando claves simétricas cifradas
+12/01/2024 12:32:00 p. m.	Recopilando esquemas
+12/01/2024 12:32:00 p. m.	Recopilando colecciones de esquemas XML
+12/01/2024 12:32:00 p. m.	Recopilando tipos de datos definidos por el usuario
+12/01/2024 12:32:00 p. m.	Recopilando tipos definidos por el usuario
+12/01/2024 12:32:00 p. m.	Recopilando tipos de tabla
+12/01/2024 12:32:00 p. m.	Recopilando claves únicas para tipos de tabla
+12/01/2024 12:32:00 p. m.	Recopilando claves principales para tipos de tabla
+12/01/2024 12:32:00 p. m.	Recopilando índices para tipos de tablas
+12/01/2024 12:32:00 p. m.	Recopilando restricciones CHECK para tipos de tabla
+12/01/2024 12:32:00 p. m.	Recopilando restricciones DEFAULT para tipos de tabla
+12/01/2024 12:32:00 p. m.	Recopilando funciones de partición
+12/01/2024 12:32:00 p. m.	Recopilando esquemas de partición
+12/01/2024 12:32:00 p. m.	Recopilando funciones
+12/01/2024 12:32:00 p. m.	Recopilando funciones cifradas
+12/01/2024 12:32:00 p. m.	Recopilando agregados
+12/01/2024 12:32:00 p. m.	Recopilando procedimientos
+12/01/2024 12:32:00 p. m.	Recopilando procedimientos cifrados
+12/01/2024 12:32:00 p. m.	Recopilando tablas
+12/01/2024 12:32:00 p. m.	Recopilando claves principales
+12/01/2024 12:32:01 p. m.	Recopilando restricciones UNIQUE
+12/01/2024 12:32:01 p. m.	Recopilando claves externas
+12/01/2024 12:32:01 p. m.	Recopilando restricciones DEFAULT
+12/01/2024 12:32:01 p. m.	Recopilando restricciones CHECK
+12/01/2024 12:32:01 p. m.	Recopilando vistas
+12/01/2024 12:32:01 p. m.	Recopilando vistas cifradas
+12/01/2024 12:32:01 p. m.	Recopilando índices
+12/01/2024 12:32:01 p. m.	Recopilando estadísticas
+12/01/2024 12:32:01 p. m.	Recopilando listas de palabras irrelevantes de índices de texto completo
+12/01/2024 12:32:01 p. m.	Recopilando listas de propiedades de búsqueda
+12/01/2024 12:32:01 p. m.	Recopilando propiedades de búsqueda
+12/01/2024 12:32:01 p. m.	Recopilando índices de texto completo
+12/01/2024 12:32:01 p. m.	Recopilando índices de almacenamiento de columnas
+12/01/2024 12:32:01 p. m.	Recopilando índices espaciales
+12/01/2024 12:32:01 p. m.	Recopilando índices XML
+12/01/2024 12:32:01 p. m.	Recopilando índices XML selectivos
+12/01/2024 12:32:01 p. m.	Recopilando desencadenadores cifrados
+12/01/2024 12:32:01 p. m.	Recopilando desencadenadores
+12/01/2024 12:32:01 p. m.	Recopilando DDL triggers cifrados y de CLR
+12/01/2024 12:32:01 p. m.	Recopilando DDL triggers
+12/01/2024 12:32:01 p. m.	Creación de la restricción perimetral en curso
+12/01/2024 12:32:01 p. m.	Recopilando sinónimos
+12/01/2024 12:32:01 p. m.	Recopilando valores predeterminados
+12/01/2024 12:32:01 p. m.	Recopilando enlaces UDDT de restricción de datos
+12/01/2024 12:32:01 p. m.	Recopilando reglas
+12/01/2024 12:32:01 p. m.	Recopilando enlaces UDDT de restricción de datos
+12/01/2024 12:32:01 p. m.	Recopilando tipos de mensaje
+12/01/2024 12:32:01 p. m.	Recopilando colas
+12/01/2024 12:32:01 p. m.	Recopilando contratos
+12/01/2024 12:32:01 p. m.	Recopilando servicios
+12/01/2024 12:32:01 p. m.	Recopilando notificaciones de eventos
+12/01/2024 12:32:01 p. m.	Recopilando enlaces de servicio remoto
+12/01/2024 12:32:01 p. m.	Recopilando prioridades de Broker
+12/01/2024 12:32:01 p. m.	Recopilando firmas
+12/01/2024 12:32:01 p. m.	Recopilando opciones de compresión de datos
+12/01/2024 12:32:01 p. m.	Recopilando tipos de secuencia
+12/01/2024 12:32:01 p. m.	Recopilando directivas de seguridad
+12/01/2024 12:32:01 p. m.	Recopilar claves de cifrado de columna
+12/01/2024 12:32:01 p. m.	Recopilando claves maestras de columna
+12/01/2024 12:32:01 p. m.	Recopilando orígenes de datos externos
+12/01/2024 12:32:01 p. m.	Recopilando formatos de archivo externos
+12/01/2024 12:32:01 p. m.	Recopilando tablas externas
+12/01/2024 12:32:01 p. m.	Recopilando propiedades extendidas
+12/01/2024 12:32:01 p. m.	Recopilando ensamblados
+12/01/2024 12:32:01 p. m.	Recopilando credenciales
+12/01/2024 12:32:01 p. m.	Recopilando inicios de sesión
+12/01/2024 12:32:01 p. m.	Recopilando auditorías de servidor
+12/01/2024 12:32:02 p. m.	Buscando elementos duplicados en el proyecto
+12/01/2024 12:32:02 p. m.	Ha finalizado el procesamiento de los elementos duplicados
+12/01/2024 12:32:05 p. m.	Finalizó la importación de la base de datos.
+12/01/2024 12:32:05 p. m.	Advertencia: [dbo].[funStrCptr]: el cuerpo no se importó porque está cifrado.
+12/01/2024 12:32:05 p. m.	Advertencia: [dbo].[funStrLong]: el cuerpo no se importó porque está cifrado.
+12/01/2024 12:32:05 p. m.	Advertencia: [dbo].[funStrInt]: el cuerpo no se importó porque está cifrado.
+12/01/2024 12:32:05 p. m.	Advertencia: [dbo].[funStr]: el cuerpo no se importó porque está cifrado.
+12/01/2024 12:32:05 p. m.	Advertencia: [dbo].[funFechaStr]: el cuerpo no se importó porque está cifrado.
+12/01/2024 12:32:05 p. m.	Para obtener más información sobre los objetos cifrados en SSDT, consulte https://go.microsoft.com/fwlink/?LinkID=238374&clcid=0x409
+12/01/2024 12:32:05 p. m.	Se guardó un resumen de la importación en la siguiente ubicación: D:\Git\IBS\STED\basedatossted\Registros de importación de esquemas\basedatossted_20240112063159.log
+12/01/2024 12:32:05 p. m.	Haga clic en Finalizar para continuar...
