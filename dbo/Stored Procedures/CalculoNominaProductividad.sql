@@ -28,7 +28,9 @@ declare @Reg					int
 
 begin try
 
+	--##############################################################################################
 	---### DEFAULT
+	
 	set @IdPlanificacion		= iif(isnull(@IdPlanificacion,0) <= 0, null, @IdPlanificacion)
 	set @IdCoordinador			= iif(isnull(@IdCoordinador,0) <= 0, null, @IdCoordinador)
 	set @IdOperador				= iif(isnull(@IdOperador,0) <= 0, null, @IdOperador)
@@ -71,7 +73,7 @@ begin try
 
 	end
 
-	if object_id('tempdb..#TMP_CalculoNominaResumen')			is null begin
+	if object_id('tempdb..#TMP_CalculoNominaResumen')	is null begin
 
 		create table #TMP_CalculoNominaResumen
 		(    
