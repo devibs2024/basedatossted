@@ -26,6 +26,9 @@ declare @Mensaje				varchar(max)
 declare @Row					int
 declare @Reg					int
 
+declare @IdProcesoNomina		DECIMAL (18)
+declare @Fecha					datetime
+
 begin try
 
 	--##############################################################################################
@@ -35,14 +38,15 @@ begin try
 	set @IdCoordinador			= iif(isnull(@IdCoordinador,0) <= 0, null, @IdCoordinador)
 	set @IdOperador				= iif(isnull(@IdOperador,0) <= 0, null, @IdOperador)
 	set @IdTienda				= iif(isnull(@IdTienda,0) <= 0, null, @IdTienda)
+	set @Fecha					= getdate()
 
     --##############################################################################################
 	--# TABLAS TEMPORALES
 	
-	if object_id('tempdb..#TMP_CalculoNomina')			is not null drop table #TMP_CalculoNomina
-	if object_id('tempdb..#TMP_CalculoNominaResumen')	is not null drop table #TMP_CalculoNominaResumen
+	if object_id('tempdb..#TMP_CalculoNomina')		is not null drop table #TMP_CalculoNomina
+	if object_id('tempdb..#TMP_ComprobanteNomina')	is not null drop table #TMP_ComprobanteNomina
 
-	if object_id('tempdb..#TMP_CalculoNomina')			is null begin
+	if object_id('tempdb..#TMP_CalculoNomina')		is null begin
 
 		create table #TMP_CalculoNomina
 		(    
@@ -73,55 +77,33 @@ begin try
 
 	end
 
-	if object_id('tempdb..#TMP_CalculoNominaResumen')	is null begin
+	if object_id('tempdb..#TMP_ComprobanteNomina')	is null begin
 
-		create table #TMP_CalculoNominaResumen
-		(    
-			
-			FechaIni					DATETIME,			
-			FechaEnd					DATETIME,			
-
-			--*** DATOS COORDINADOR
-			IdCoordinador				INT,
-			Coordinador					VARCHAR(250),
-
-			--*** DATOS OPERADOR
-			IdOperador					INT,
-			Operador					VARCHAR(250),
-			
-			IdSegmento					INT,
-			Segmento					VARCHAR(50),
-			Spot						BIT,
-
-			Tarjeta						VARCHAR(50),		
-			IdBanco						INT,				
-			Banco						VARCHAR(250),
-			
-			Salario						DECIMAL(19,6),
-			SMG							DECIMAL(19,6),
-
-			--*** DATOS TIENDA/SUCURSAL
-			IdTienda					INT,				
-			Tienda						VARCHAR(250),
-			IdZonaSted					INT,				
-			ZonaSted					VARCHAR(50),
-			
-			--*** DATA
-			Dias						INT,
-			
-			SubTotal1					DECIMAL(19,6),
-			Descuento					DECIMAL(19,6),
-			Bono						DECIMAL(19,6),
-			Gasolina					DECIMAL(19,6),
-			SubTotal2					DECIMAL(19,6),			
-			Total						DECIMAL(19,6),
-			STED						DECIMAL(19,6),
-			Pago						DECIMAL(19,6),
-
-			Accion						VARCHAR(50),		
-		)
+		select 
+			* 
+		into #TMP_ComprobanteNomina
+		from tbl_ComprobanteNomina
+		where 1 = 2
 
 	end
+
+	--##############################################################################################
+	--#### DEPURANDO PROCESO
+
+	delete from tbl_ProcesoNomina 
+	where	isnull(Procesado,0)		= 0 
+		and IdPlanificacion			= @IdPlanificacion 
+		and isnull(IdCoordinador,0)	= isnull(@IdCoordinador, isnull(IdCoordinador,0))
+		and isnull(IdOperador,0)	= isnull(@IdOperador, isnull(IdOperador,0))
+		and isnull(IdTienda,0)		= isnull(@IdTienda, isnull(IdTienda,0))
+
+	delete from tbl_ComprobanteNomina
+	where	IdProcesoNomina			not in (select IdProcesoNomina from tbl_ProcesoNomina)
+
+	update tbl_EjecucionPlanificacion set
+		IdProcesoNomina				= null,
+		IdComprobanteNomina			= null
+	where IdProcesoNomina			not in (select IdProcesoNomina from tbl_ProcesoNomina)
 
 	--##############################################################################################
 	--#### DATA | DETALLE DE NOMINA
@@ -162,8 +144,10 @@ begin try
 	set @SQL += char(13) + '	EP.[MontoHorasExtras],'
 	set @SQL += char(13) + '	EP.[MontoCombustible]'
 	set @SQL += char(13) + 'from tbl_EjecucionPlanificacion EP with(NoLock), tbl_DetallePlanificacion DP with(NoLock), tbl_Planificacion P with(NoLock)'
-	set @SQL += char(13) + 'where	EP.IdDetallePlanificacion	= DP.IdDetallePlanificacion and EP.IdPlanificacion = DP.IdPlanificacion'
-	set @SQL += char(13) + '	and DP.IdPlanificacion			= P.IdPlanificacion'
+	set @SQL += char(13) + 'where	EP.IdDetallePlanificacion			= DP.IdDetallePlanificacion and EP.IdPlanificacion = DP.IdPlanificacion'
+	set @SQL += char(13) + '	and DP.IdPlanificacion					= P.IdPlanificacion'
+	set @SQL += char(13) + '	and isnull(EP.IdComprobanteNomina,0)	= 0'
+	set @SQL += char(13) + '	and isnull(EP.IdProcesoNomina,0)		= 0'
 
 	--*** FILTROS
 
@@ -207,16 +191,61 @@ begin try
 	--##############################################################################################
 	--#### RESUMEN
 
-	insert into #TMP_CalculoNominaResumen
+	if exists(select * from #TMP_CalculoNomina) begin
+
+		set @IdProcesoNomina = null
+		
+		insert into tbl_ProcesoNomina
+		(
+			Fecha,
+			FechaIni,
+			FechaEnd,
+		
+			IdPlanificacion,
+			IdCoordinador,
+			IdOperador,
+			IdTienda,
+		
+			Procesado,
+			Accion
+		)
+		select 
+			@Fecha,
+			@FechaIni,
+			@FechaEnd,
+		
+			@IdPlanificacion,
+			@IdCoordinador,
+			@IdOperador,
+			@IdTienda,
+		
+			0,
+			''
+		
+		set @IdProcesoNomina	= @@IDENTITY
+
+	end
+
+	insert into #TMP_ComprobanteNomina
 	(
+		IdProcesoNomina,
+
+		IdPlanificacion,
 		IdCoordinador,			
 		IdOperador,
-		IdTienda
+		IdTienda,
+
+		Fecha
 	)
 	select
+		@IdProcesoNomina,
+
+		@IdPlanificacion,
 		IdCoordinador,			
 		IdOperador,
-		IdTienda				
+		IdTienda,
+		
+		@Fecha
 	from #TMP_CalculoNomina
 	group by 
 		IdCoordinador,
@@ -226,21 +255,21 @@ begin try
 	--##############################################################################################
 	--### RESUMEN | REFERENCIAS	
 
-	update #TMP_CalculoNominaResumen set
+	update #TMP_ComprobanteNomina set
 		FechaIni		= @FechaIni,
 		FechaEnd		= @FechaEnd,
 		Accion			= ''
 
 	--*** DETALLE NOMINA | COORDINADOR
 
-	update #TMP_CalculoNominaResumen set
+	update #TMP_ComprobanteNomina set
 		Coordinador			= ltrim(rtrim(isnull(E.Nombres,''))) + ' ' + ltrim(rtrim(isnull(E.ApellidoPaterno,''))) + ' ' + ltrim(rtrim(isnull(E.ApellidoMaterno,'')))		
-	from #TMP_CalculoNominaResumen N, tbl_Empleados E with(NoLock)
+	from #TMP_ComprobanteNomina N, tbl_Empleados E with(NoLock)
 	where N.IdCoordinador	= E.IdEmpleado
 
 	--*** OPERADOR
 
-	update #TMP_CalculoNominaResumen set
+	update #TMP_ComprobanteNomina set
 		Operador			= ltrim(rtrim(isnull(E.Nombres,''))) + ' ' + ltrim(rtrim(isnull(E.ApellidoPaterno,''))) + ' ' + ltrim(rtrim(isnull(E.ApellidoMaterno,''))),
 		IdSegmento			= E.IdSegmento,						-- Interno = 1, Externo = 2, Spot = 3
 		Segmento			= case E.IdSegmento 
@@ -252,14 +281,14 @@ begin try
 		
 		Salario				= E.Salario,
 		SMG					= E.SMG
-	from #TMP_CalculoNominaResumen N, tbl_Empleados E with(NoLock)
+	from #TMP_ComprobanteNomina N, tbl_Empleados E with(NoLock)
 	where N.IdOperador		= E.IdEmpleado
 
-	update #TMP_CalculoNominaResumen set
+	update #TMP_ComprobanteNomina set
 		Tarjeta								= ECB.CuentaBancaria,
 		IdBanco								= ECB.IdBanco,
 		Banco								= CB.NombreBanco
-	from #TMP_CalculoNominaResumen N, tbl_EmpleadoCuentaBancaria ECB with(NoLock), tbl_CatalogoBancos CB with(NoLock)
+	from #TMP_ComprobanteNomina N, tbl_EmpleadoCuentaBancaria ECB with(NoLock), tbl_CatalogoBancos CB with(NoLock)
 	where	N.IdOperador					= ECB.IdEmpleado
 		and isnull(ECB.Activa,0)			= 1
 		and isnull(ECB.CuentaPrincipal,0)	= 1
@@ -267,51 +296,154 @@ begin try
 
 	--*** TIENDA
 
-	update #TMP_CalculoNominaResumen set
+	update #TMP_ComprobanteNomina set
 		Tienda				= T.NombreTienda,
 		IdZonaSted			= T.IdZonaSted
-	from #TMP_CalculoNominaResumen N, tbl_Tienda T with(NoLock)
+	from #TMP_ComprobanteNomina N, tbl_Tienda T with(NoLock)
 	where N.IdTienda		= T.IdTienda
 
-	update #TMP_CalculoNominaResumen set
+	update #TMP_ComprobanteNomina set
 		ZonaSted			= ZS.NombreZona
-	from #TMP_CalculoNominaResumen N, tbl_ZonaSted ZS with(NoLock)
+	from #TMP_ComprobanteNomina N, tbl_ZonaSted ZS with(NoLock)
 	where N.IdZonaSted		= ZS.IdZonaSted
 
 
 	--##############################################################################################
 	--### RESUMEN | CALCULOS
 		
-	update #TMP_CalculoNominaResumen set 
-		Dias		= isnull((select count(-1) from #TMP_CalculoNomina N where N.IdOperador = R.IdOperador),0),
-		Descuento	= isnull((select isnull(sum(isnull(DescuentoTardanza,0)),0) from #TMP_CalculoNomina N where N.IdOperador = R.IdOperador),0),
-		Bono		= isnull((select isnull(sum(isnull(MontoHorasExtras,0) + isnull(IncentivoFactura,0)),0) from #TMP_CalculoNomina N where N.IdOperador = R.IdOperador),0),
-		Gasolina	= isnull((select isnull(sum(isnull(MontoCombustible,0)),0) from #TMP_CalculoNomina N where N.IdOperador = R.IdOperador),0)
-	from #TMP_CalculoNominaResumen R
+	update #TMP_ComprobanteNomina set 
+		Dias		= isnull((select count(-1)																from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda),0),
+		Descuento	= isnull((select isnull(sum(isnull(DescuentoTardanza,0)),0)								from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda),0),
+		Bono		= isnull((select isnull(sum(isnull(MontoHorasExtras,0) + isnull(IncentivoFactura,0)),0) from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda),0),
+		Gasolina	= isnull((select isnull(sum(isnull(MontoCombustible,0)),0)								from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda),0)
+	from #TMP_ComprobanteNomina R
 	
-	update #TMP_CalculoNominaResumen set 
+	update #TMP_ComprobanteNomina set 
 		SubTotal1 = isnull(Salario,0) * isnull(Dias,0)
 
-	update #TMP_CalculoNominaResumen set 
+	update #TMP_ComprobanteNomina set 
 		SubTotal2 = isnull(SubTotal1,0) - isnull(Descuento,0) + isnull(Bono,0) + isnull(Gasolina,0)
 
-	update #TMP_CalculoNominaResumen set 
+	update #TMP_ComprobanteNomina set 
 		Total = isnull(SubTotal2,0) - isnull(SMG,0)
 
-	update #TMP_CalculoNominaResumen set 
+	update #TMP_ComprobanteNomina set 
 		STED = isnull( iif(Dias >= 7, 600, 0) , 0 )
 
-	update #TMP_CalculoNominaResumen set 
-		Pago = isnull(Total,0) - isnull(STED,0)
+	update #TMP_ComprobanteNomina set 
+		Pago = isnull(Total,0) - isnull(STED,0)	
 
-	--select * from #TMP_CalculoNomina order by Fecha
-	select * from #TMP_CalculoNominaResumen order by Operador
+	--##############################################################################################
+	--### GENERACION DE COMPROBANTES
+
+	insert into tbl_ComprobanteNomina
+	(
+		IdProcesoNomina,
+		IdPlanificacion,
+
+		Fecha,
+		FechaIni,
+		FechaEnd,
+	
+		IdCoordinador,
+		Coordinador,
+	
+		IdOperador,
+		Operador,
+	
+		IdSegmento,
+		Segmento,
+		Spot,
+	
+		Tarjeta,
+		IdBanco,
+		Banco,
+	
+		Salario,
+		SMG,
+	
+		IdTienda,
+		Tienda,
+		IdZonaSted,
+		ZonaSted,
+	
+		Dias,
+	
+		SubTotal1,
+		Descuento,
+		Bono,
+		Gasolina,
+		SubTotal2,
+		Total,
+		STED,
+		Pago,
+	
+		Accion
+	)
+	select
+		@IdProcesoNomina,
+		@IdPlanificacion,
+
+		Fecha,
+		FechaIni,
+		FechaEnd,
+	
+		IdCoordinador,
+		Coordinador,
+	
+		IdOperador,
+		Operador,
+	
+		IdSegmento,
+		Segmento,
+		Spot,
+	
+		Tarjeta,
+		IdBanco,
+		Banco,
+	
+		Salario,
+		SMG,
+	
+		IdTienda,
+		Tienda,
+		IdZonaSted,
+		ZonaSted,
+	
+		Dias,
+	
+		SubTotal1,
+		Descuento,
+		Bono,
+		Gasolina,
+		SubTotal2,
+		Total,
+		STED,
+		Pago,
+	
+		Accion
+	from #TMP_ComprobanteNomina
+
+	update tbl_EjecucionPlanificacion set
+		IdProcesoNomina							= N.IdProcesoNomina,
+		IdComprobanteNomina						= N.IdComprobanteNomina
+	from tbl_EjecucionPlanificacion EP, tbl_ComprobanteNomina N
+	where	EP.IdOperador						= N.IdOperador
+		and EP.IdTienda							= N.IdTienda
+		and isnull(EP.IdComprobanteNomina,0)	= 0
+		and isnull(EP.IdProcesoNomina,0)		= 0
+		and N.IdProcesoNomina					= @IdProcesoNomina
+
+	--##############################################################################################
+	--#### SALIDA
+
+	select * from tbl_ComprobanteNomina where IdProcesoNomina = @IdProcesoNomina order by Operador
 
 	--##############################################################################################
 	--#### TABLAS TEMPORALES
 
-	if object_id('tempdb..#TMP_CalculoNomina')			is not null drop table #TMP_CalculoNomina
-	if object_id('tempdb..#TMP_CalculoNominaResumen')	is not null drop table #TMP_CalculoNominaResumen
+	if object_id('tempdb..#TMP_CalculoNomina')		is not null drop table #TMP_CalculoNomina
+	if object_id('tempdb..#TMP_ComprobanteNomina')	is not null drop table #TMP_ComprobanteNomina
 
 end try
 begin catch

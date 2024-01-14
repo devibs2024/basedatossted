@@ -15,6 +15,8 @@
     [Justificacion]            NVARCHAR (250)  DEFAULT (N'') NOT NULL,
     [IsDeleted]                BIT             DEFAULT (CONVERT([bit],(0))) NOT NULL,
     [MontoCombustible]         DECIMAL (18, 2) NULL,
+    [IdProcesoNomina]          DECIMAL (18)    NULL,
+    [IdComprobanteNomina]      DECIMAL (18)    NULL,
     CONSTRAINT [PK_tbl_EjecucionPlanificacion] PRIMARY KEY CLUSTERED ([IdPlanificacion] ASC, [IdEjecucionPlanificacion] ASC),
     CONSTRAINT [FK_Ejecucion_Planificacion] FOREIGN KEY ([IdPlanificacion]) REFERENCES [dbo].[tbl_Planificacion] ([IdPlanificacion]),
     CONSTRAINT [FK_EjecucionPlanificacion_Operador] FOREIGN KEY ([IdOperador]) REFERENCES [dbo].[tbl_Empleados] ([IdEmpleado]),
