@@ -14,6 +14,7 @@
 	Procesado					BIT,
 
 	Accion						VARCHAR(50),
+	IsDeleted					BIT            DEFAULT (CONVERT([bit],(0))) NOT NULL,
 
 	CONSTRAINT [PK_tbl_ProcesoNomina] PRIMARY KEY CLUSTERED ([IdProcesoNomina] ASC),
 )

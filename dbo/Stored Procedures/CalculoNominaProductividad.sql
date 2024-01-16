@@ -2,7 +2,7 @@
 -- Producto:		INTERNATIONAL BUSINESS SOLUTION DE MEXICO | STED - Traslados
 -- Autor:			Benito Mora Cruz (Mocbana)
 -- Fecha:           11 de Enero del 2024
--- Descripción:		Stored Procedure | Reporte de Nomina
+-- Descripción:		Stored Procedure | Calculo de Nomina
 /*==================================================================================================*/
 
 CREATE PROCEDURE [dbo].[CalculoNominaProductividad]
@@ -90,20 +90,20 @@ begin try
 	--##############################################################################################
 	--#### DEPURANDO PROCESO
 
-	delete from tbl_ProcesoNomina 
+	update tbl_ProcesoNomina set
+		IsDeleted					= 1
 	where	isnull(Procesado,0)		= 0 
 		and IdPlanificacion			= @IdPlanificacion 
 		and isnull(IdCoordinador,0)	= isnull(@IdCoordinador, isnull(IdCoordinador,0))
-		and isnull(IdOperador,0)	= isnull(@IdOperador, isnull(IdOperador,0))
-		and isnull(IdTienda,0)		= isnull(@IdTienda, isnull(IdTienda,0))
 
-	delete from tbl_ComprobanteNomina
-	where	IdProcesoNomina			not in (select IdProcesoNomina from tbl_ProcesoNomina)
+	update tbl_ComprobanteNomina set
+		IsDeleted					= 1
+	where	IdProcesoNomina			in (select IdProcesoNomina from tbl_ProcesoNomina where isnull(IsDeleted,0) = 1)
 
 	update tbl_EjecucionPlanificacion set
 		IdProcesoNomina				= null,
 		IdComprobanteNomina			= null
-	where IdProcesoNomina			not in (select IdProcesoNomina from tbl_ProcesoNomina)
+	where IdProcesoNomina			in (select IdProcesoNomina from tbl_ProcesoNomina where isnull(IsDeleted,0) = 1)
 
 	--##############################################################################################
 	--#### DATA | DETALLE DE NOMINA
@@ -148,6 +148,7 @@ begin try
 	set @SQL += char(13) + '	and DP.IdPlanificacion					= P.IdPlanificacion'
 	set @SQL += char(13) + '	and isnull(EP.IdComprobanteNomina,0)	= 0'
 	set @SQL += char(13) + '	and isnull(EP.IdProcesoNomina,0)		= 0'
+	set @SQL += char(13) + '	and isnull(EP.IsDeleted,0)				= 0'
 
 	--*** FILTROS
 
@@ -207,7 +208,7 @@ begin try
 			IdTienda,
 		
 			Procesado,
-			Accion
+			Accion			
 		)
 		select 
 			@Fecha,
@@ -235,7 +236,9 @@ begin try
 		IdOperador,
 		IdTienda,
 
-		Fecha
+		Fecha,
+
+		IsDeleted
 	)
 	select
 		@IdProcesoNomina,
@@ -245,7 +248,9 @@ begin try
 		IdOperador,
 		IdTienda,
 		
-		@Fecha
+		@Fecha,
+
+		0
 	from #TMP_CalculoNomina
 	group by 
 		IdCoordinador,

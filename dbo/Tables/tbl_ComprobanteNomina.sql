@@ -45,7 +45,10 @@
 	STED						DECIMAL(19,6),
 	Pago						DECIMAL(19,6),
 
+	Procesado					BIT,
 	Accion						VARCHAR(50),
+
+	IsDeleted					BIT            DEFAULT (CONVERT([bit],(0))) NOT NULL,
 
 	CONSTRAINT [PK_tbl_ComprobanteNomina] PRIMARY KEY CLUSTERED ([IdComprobanteNomina] ASC),
 )
