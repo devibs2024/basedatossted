@@ -55,10 +55,11 @@ From tbl_EjecucionPlanificacion Ejecucion
 		On Ejecucion.IdOperador = Oper.IdEmpleado
 	Inner Join tbl_AsignacionTarjeta tc
 		On oper.IdEmpleado = tc.IdEmpleado
-		And tc.Activa = 1 And tc.TarjetaPrincipal = 1
+		And tc.Activa = 1 And tc.TarjetaPrincipal = 1 and isnull(tc.IsDeleted,0) = 0
 	Inner Join tbl_EmpleadoCuentaBancaria cta
 		On cta.IdEmpleado = oper.IdEmpleado
-		And cta.Activa = 1 And cta.CuentaPrincipal = 1
+		And cta.Activa = 1 And cta.CuentaPrincipal = 1 and isnull(cta.IsDeleted,0) = 0
 	Inner Join tbl_CatalogoBancos bco
 		On cta.IdBanco = bco.IdBanco
+
 
