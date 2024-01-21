@@ -38,11 +38,17 @@ Select
 , cta.CuentaBancaria
 , bco.IdBanco
 , bco.NombreBanco
+, Ejecucion.IdVehiculo
+, veh.NombreVehiculo
+, Ejecucion.IdTipoVehiculo
+, Ejecucion.IdTarjeta
 From tbl_EjecucionPlanificacion Ejecucion
 	Left Join tbl_DetallePlanificacion Detalle
 		On Detalle.IdPlanificacion  =  Ejecucion.IdPlanificacion
 	   And Detalle.IdDetallePlanificacion =  Ejecucion.IdDetallePlanificacion
 	   And Detalle.IdOperador = Ejecucion.IdOperador
+	left join tbl_Vehiculo veh
+		on Ejecucion.IdVehiculo = veh.IdVehiculo
 	Inner Join tbl_Tienda Tda
 		On Ejecucion.IdTienda = tda.IdTienda
 	Inner Join tbl_ZonaSted ZnaSted
@@ -52,7 +58,7 @@ From tbl_EjecucionPlanificacion Ejecucion
 	Inner Join tbl_CatalogoEstado est
 		On tda.IdEstado = est.IdEstado
 	Inner Join tbl_Empleados Oper
-		On Ejecucion.IdOperador = Oper.IdEmpleado
+		On Ejecucion.IdOperador = Oper.IdEmpleado		
 	Inner Join tbl_AsignacionTarjeta tc
 		On oper.IdEmpleado = tc.IdEmpleado
 		And tc.Activa = 1 And tc.TarjetaPrincipal = 1 and isnull(tc.IsDeleted,0) = 0
