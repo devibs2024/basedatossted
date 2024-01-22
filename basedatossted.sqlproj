@@ -128,5 +128,6 @@
     <Build Include="dbo\Tables\tbl_ProcesoNomina.sql" />
     <Build Include="dbo\Stored Procedures\ConsultaNominaProductividad.sql" />
     <Build Include="dbo\Stored Procedures\ReporteGasolina.sql" />
+    <Build Include="dbo\Stored Procedures\ReporteVehiculosExtra.sql" />
   </ItemGroup>
 </Project>

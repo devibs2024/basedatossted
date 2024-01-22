@@ -5,7 +5,7 @@
 -- Descripción:		Stored Procedure | Calculo de Nomina
 /*==================================================================================================*/
 
-ALTER PROCEDURE [dbo].[CalculoNominaProductividad]
+CREATE PROCEDURE [dbo].[CalculoNominaProductividad]
 
 @IdPlanificacion				INT					= NULL,
 @IdCoordinador					INT					= NULL,

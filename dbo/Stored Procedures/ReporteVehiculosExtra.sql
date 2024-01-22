@@ -5,7 +5,7 @@
 -- Descripción:		Stored Procedure | Reporte de Vehículos Extra
 /*==================================================================================================*/
 
-ALTER PROCEDURE [dbo].[ReporteVehiculosExtra]
+CREATE PROCEDURE [dbo].[ReporteVehiculosExtra]
 
 @IdCoordinador					INT					= NULL,
 @IdCliente						INT					= NULL,

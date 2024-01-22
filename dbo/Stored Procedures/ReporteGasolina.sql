@@ -5,7 +5,7 @@
 -- Descripción:		Stored Procedure | Reporte de Consumo de Gasolina
 /*==================================================================================================*/
 
-ALTER PROCEDURE [dbo].[ReporteGasolina]
+CREATE PROCEDURE [dbo].[ReporteGasolina]
 
 @IdCoordinador					INT					= NULL,
 @IdOperador						INT					= NULL,
