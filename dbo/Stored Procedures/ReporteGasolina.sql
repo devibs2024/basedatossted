@@ -95,6 +95,9 @@ begin try
 			Salario						DECIMAL(19,6),
 			SMG							DECIMAL(19,6),
 
+			IdCliente					INT,				
+			Cliente						VARCHAR(250),
+
 			IdTienda					INT,				
 			Tienda						VARCHAR(250),
 			IdZonaSted					INT,				
@@ -118,7 +121,6 @@ begin try
 	end
 
 	if object_id('tempdb..#TMP_ReporteGasolina')	is null begin
-
 		
 		create table #TMP_ReporteGasolina
 		(    
@@ -208,7 +210,6 @@ begin try
 	print(@SQL)
 	exec(@SQL)
 
-
 	insert into #TMP_Base
 	(
 		IdComprobanteNomina,
@@ -229,6 +230,8 @@ begin try
 		Banco,
 		Salario,
 		SMG,
+		IdCliente,
+		Cliente,
 		IdTienda,
 		Tienda,
 		IdZonaSted,
@@ -264,6 +267,8 @@ begin try
 		CN.Banco,
 		CN.Salario,
 		CN.SMG,
+		CN.IdCliente,
+		CN.Cliente,
 		CN.IdTienda,
 		CN.Tienda,
 		CN.IdZonaSted,
@@ -280,7 +285,7 @@ begin try
 		CN.Procesado,
 		CN.Accion
 	from tbl_ComprobanteNomina CN with(NoLock)
-	where	CN.IdComprobanteNomina	in (select IdProcesoNomina from #TMP_Ejecucion)
+	where	CN.IdComprobanteNomina	in (select IdComprobanteNomina from #TMP_Ejecucion)
 
 	--##############################################################################################
 	--### CALCULOS
@@ -323,7 +328,6 @@ begin try
 	where	E.IdProcesoNomina		= B.IdProcesoNomina
 		and E.IdComprobanteNomina	= B.IdComprobanteNomina
 	group by B.IdCoordinador, B.Coordinador, B.IdOperador, B.Operador, B.IdTienda, B.Tienda, E.IdTarjeta, B.Fecha
-
 
 	update #TMP_ReporteGasolina set
 		Tarjeta = T.NumTarjeta

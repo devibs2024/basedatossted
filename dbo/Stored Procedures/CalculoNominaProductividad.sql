@@ -168,10 +168,6 @@ begin try
 	print(@SQL)
 	exec(@SQL)
 
-	--##############################################################################################
-	--### DETALLE NOMINA | REFERENCIAS		
-		
-
 
 	--##############################################################################################
 	--#### DETALLE NOMINA | CALCULOS
@@ -299,6 +295,19 @@ begin try
 		and isnull(ECB.CuentaPrincipal,0)	= 1
 		and ECB.IdBanco						= CB.IdBanco
 
+	--*** CLIENTE
+
+	update #TMP_ComprobanteNomina set
+		IdCliente					= CC.IdCliente
+	from #TMP_ComprobanteNomina N, tbl_CoordinadorCliente CC with(NoLock)
+	where	N.IdCoordinador			= CC.IdCoordinador
+		and isnull(CC.IsDeleted,0)	= 0
+
+	update #TMP_ComprobanteNomina set
+		Cliente						= C.NombreCliente
+	from #TMP_ComprobanteNomina N, tbl_Cliente C with(NoLock)
+	where N.IdCliente				= C.IdCliente
+	
 	--*** TIENDA
 
 	update #TMP_ComprobanteNomina set
@@ -311,7 +320,6 @@ begin try
 		ZonaSted			= ZS.NombreZona
 	from #TMP_ComprobanteNomina N, tbl_ZonaSted ZS with(NoLock)
 	where N.IdZonaSted		= ZS.IdZonaSted
-
 
 	--##############################################################################################
 	--### RESUMEN | CALCULOS
@@ -367,6 +375,9 @@ begin try
 		Salario,
 		SMG,
 	
+		IdCliente,
+		Cliente,
+
 		IdTienda,
 		Tienda,
 		IdZonaSted,
@@ -410,6 +421,9 @@ begin try
 		Salario,
 		SMG,
 	
+		IdCliente,
+		Cliente,
+
 		IdTienda,
 		Tienda,
 		IdZonaSted,

@@ -28,7 +28,6 @@ declare @Reg					int
 declare @Fecha					datetime
 
 declare @IdClienteRow			int
-declare @IdFormatoRow			int
 declare @IdTiendaRow			int
 declare @IdTipoVehiculoRow		int
 declare @IdCoordinadorRow		int
@@ -120,6 +119,9 @@ begin try
 			Salario						DECIMAL(19,6),
 			SMG							DECIMAL(19,6),
 
+			IdCliente					INT,				
+			Cliente						VARCHAR(250),
+
 			IdTienda					INT,				
 			Tienda						VARCHAR(250),
 			IdZonaSted					INT,				
@@ -154,9 +156,6 @@ begin try
 
 			IdCliente					BIGINT,				
 			Cliente						VARCHAR(250),
-
-			IdFormato					BIGINT,				
-			Formato						VARCHAR(250),
 
 			IdTienda					BIGINT,				
 			Tienda						VARCHAR(250),
@@ -262,6 +261,8 @@ begin try
 		Banco,
 		Salario,
 		SMG,
+		IdCliente,
+		Cliente,
 		IdTienda,
 		Tienda,
 		IdZonaSted,
@@ -297,6 +298,8 @@ begin try
 		CN.Banco,
 		CN.Salario,
 		CN.SMG,
+		CN.IdCliente,
+		CN.Cliente,
 		CN.IdTienda,
 		CN.Tienda,
 		CN.IdZonaSted,
@@ -313,7 +316,7 @@ begin try
 		CN.Procesado,
 		CN.Accion
 	from tbl_ComprobanteNomina CN with(NoLock)
-	where	CN.IdComprobanteNomina	in (select IdProcesoNomina from #TMP_Ejecucion)
+	where	CN.IdComprobanteNomina	in (select IdComprobanteNomina from #TMP_Ejecucion)
 
 	set @Fecha = @FechaIni
 	while @Fecha <= @FechaEnd begin
@@ -349,6 +352,9 @@ begin try
 		IdCoordinador,				
 		Coordinador,					
 
+		IdCliente,
+		Cliente,
+
 		IdTienda,					
 		Tienda,						
 
@@ -362,6 +368,9 @@ begin try
 		B.IdCoordinador,				
 		B.Coordinador,												
 
+		B.IdCliente,					
+		B.Cliente,	
+
 		B.IdTienda,					
 		B.Tienda,	
 
@@ -371,7 +380,7 @@ begin try
 	from #TMP_Ejecucion E, #TMP_Base B
 	where	E.IdProcesoNomina		= B.IdProcesoNomina
 		and E.IdComprobanteNomina	= B.IdComprobanteNomina
-	group by B.IdCoordinador, B.Coordinador, B.IdTienda, B.Tienda, E.IdTipoVehiculo
+	group by B.IdCoordinador, B.Coordinador, B.IdCliente, B.Cliente, B.IdTienda, B.Tienda, E.IdTipoVehiculo
 
 	update #TMP_ReporteVehiculosExtra set
 		TipoVehiculo = TV.TipoVehiculo
@@ -379,10 +388,6 @@ begin try
 	where TG.IdTipoVehiculo	= TV.IdTipoVehiculo
 
 	update #TMP_ReporteVehiculosExtra set
-		IdCliente					= 0,
-		Cliente						= '',
-		IdFormato					= 0,
-		Formato						= '',
 		UnidadesSpot				= 0,
 		TotalUnidadesSolicitadas	= 0,	
 		TotalUnidadesSpot			= 0,
@@ -391,10 +396,10 @@ begin try
 		JsonUnidades				= ''
 
 	declare _CursorRow insensitive cursor for
-	select Row, IdCoordinador, IdCliente, IdFormato, IdTienda, IdTipoVehiculo
+	select Row, IdCoordinador, IdCliente, IdTienda, IdTipoVehiculo
 	from #TMP_ReporteVehiculosExtra
 	open _CursorRow
-	fetch next from _CursorRow into @Row, @IdCoordinadorRow, @IdClienteRow, @IdFormatoRow, @IdTiendaRow, @IdTipoVehiculoRow
+	fetch next from _CursorRow into @Row, @IdCoordinadorRow, @IdClienteRow, @IdTiendaRow, @IdTipoVehiculoRow
 	while @@fetch_status = 0  begin   
 
 		update #TMP_Dias set
@@ -403,8 +408,8 @@ begin try
 			Tot		= 0
 
 		update #TMP_Dias set
-			Sol =	(select count(-1) from #TMP_Ejecucion E, #TMP_Base B where E.IdProcesoNomina = B.IdProcesoNomina and E.IdComprobanteNomina = B.IdComprobanteNomina and D.Anio = year(E.Fecha) and D.Mes = month(E.Fecha) and D.Dia = day(E.Fecha) and B.IdCoordinador = @IdCoordinadorRow and E.IdTienda = @IdTiendaRow and E.IdTipoVehiculo = @IdTipoVehiculoRow and B.Spot = 0),
-			Spot =	(select count(-1) from #TMP_Ejecucion E, #TMP_Base B where E.IdProcesoNomina = B.IdProcesoNomina and E.IdComprobanteNomina = B.IdComprobanteNomina and D.Anio = year(E.Fecha) and D.Mes = month(E.Fecha) and D.Dia = day(E.Fecha) and B.IdCoordinador = @IdCoordinadorRow and E.IdTienda = @IdTiendaRow and E.IdTipoVehiculo = @IdTipoVehiculoRow and B.Spot = 1)
+			Sol =	(select count(-1) from #TMP_Ejecucion E, #TMP_Base B where E.IdProcesoNomina = B.IdProcesoNomina and E.IdComprobanteNomina = B.IdComprobanteNomina and B.IdCliente = @IdClienteRow and D.Anio = year(E.Fecha) and D.Mes = month(E.Fecha) and D.Dia = day(E.Fecha) and B.IdCoordinador = @IdCoordinadorRow and E.IdTienda = @IdTiendaRow and E.IdTipoVehiculo = @IdTipoVehiculoRow and B.Spot = 0),
+			Spot =	(select count(-1) from #TMP_Ejecucion E, #TMP_Base B where E.IdProcesoNomina = B.IdProcesoNomina and E.IdComprobanteNomina = B.IdComprobanteNomina and B.IdCliente = @IdClienteRow and D.Anio = year(E.Fecha) and D.Mes = month(E.Fecha) and D.Dia = day(E.Fecha) and B.IdCoordinador = @IdCoordinadorRow and E.IdTienda = @IdTiendaRow and E.IdTipoVehiculo = @IdTipoVehiculoRow and B.Spot = 1)
 		from #TMP_Dias D
 
 		update #TMP_Dias set
@@ -414,15 +419,20 @@ begin try
 			TotalUnidadesSolicitadas	= (select sum(Sol) from #TMP_Dias D),
 			TotalUnidadesSpot			= (select sum(Spot) from #TMP_Dias D),
 			TotalUnidades				= (select sum(Tot) from #TMP_Dias D),
+			TotalUnidadesGeneral		= (select sum(Tot) from #TMP_Dias D),
 			JsonUnidades = ((select * from #TMP_Dias order by Anio, Mes, Dia for json auto))
 		where Row = @Row
 
-		fetch next from _CursorRow into @Row, @IdCoordinadorRow, @IdClienteRow, @IdFormatoRow, @IdTiendaRow, @IdTipoVehiculoRow
+		fetch next from _CursorRow into @Row, @IdCoordinadorRow, @IdClienteRow, @IdTiendaRow, @IdTipoVehiculoRow
 
 	end
 	close       _CursorRow   
 	deallocate  _CursorRow
 
+	update #TMP_ReporteVehiculosExtra set 
+			UnidadesSpot	= T.CntEmpleadosSpot
+	from #TMP_ReporteVehiculosExtra VE, tbl_Tienda T
+	where VE.IdTienda	= T.IdTienda
 
 	--##############################################################################################
 	--#### SALIDA

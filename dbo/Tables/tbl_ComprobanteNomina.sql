@@ -27,6 +27,10 @@
 	Salario						DECIMAL(19,6),
 	SMG							DECIMAL(19,6),
 
+	--*** DATOS CLIENTE
+	IdCliente					INT,
+	Cliente						VARCHAR(250),
+
 	--*** DATOS TIENDA/SUCURSAL
 	IdTienda					INT,				
 	Tienda						VARCHAR(250),
