@@ -5,7 +5,7 @@
 -- Descripción:		Stored Procedure | Calculo de Nomina
 /*==================================================================================================*/
 
-CREATE PROCEDURE [dbo].[CalculoNominaProductividad]
+ALTER PROCEDURE [dbo].[CalculoNominaProductividad]
 
 @IdPlanificacion				INT					= NULL,
 @IdCoordinador					INT					= NULL,
@@ -438,6 +438,10 @@ begin try
 		and isnull(EP.IdComprobanteNomina,0)	= 0
 		and isnull(EP.IdProcesoNomina,0)		= 0
 		and N.IdProcesoNomina					= @IdProcesoNomina
+
+	update tbl_Planificacion set
+		EstatusPlanificacionId					= 2
+	where IdPlanificacion						= @IdPlanificacion
 
 	--##############################################################################################
 	--#### SALIDA
