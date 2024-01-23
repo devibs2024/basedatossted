@@ -516,9 +516,25 @@ begin try
 	where N.IdCliente		= C.IdCliente
 
 	update #TMP_ReporteComparativoPagos set 
-		Dias			= isnull((select count(-1)																from #TMP_Ejecucion N, #TMP_Base B	where N.IdProcesoNomina = B.IdProcesoNomina and N.IdComprobanteNomina = B.IdComprobanteNomina and B.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda and N.IdTipoVehiculo = R.IdTipoVehiculo),0),
-		Gasolina		= isnull((select isnull(sum(isnull(MontoCombustible,0)),0)								from #TMP_Ejecucion N, #TMP_Base B	where N.IdProcesoNomina = B.IdProcesoNomina and N.IdComprobanteNomina = B.IdComprobanteNomina and B.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda and N.IdTipoVehiculo = R.IdTipoVehiculo),0)
+		NoUnidades			= isnull((select count(-1)																from #TMP_Ejecucion N, #TMP_Base B	where N.IdProcesoNomina = B.IdProcesoNomina and N.IdComprobanteNomina = B.IdComprobanteNomina and B.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda and N.IdTipoVehiculo = R.IdTipoVehiculo),0),
+		Dias				= isnull((select count(-1)																from #TMP_Ejecucion N, #TMP_Base B	where N.IdProcesoNomina = B.IdProcesoNomina and N.IdComprobanteNomina = B.IdComprobanteNomina and B.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda and N.IdTipoVehiculo = R.IdTipoVehiculo),0),
+		Gasolina			= isnull((select isnull(sum(isnull(MontoCombustible,0)),0)								from #TMP_Ejecucion N, #TMP_Base B	where N.IdProcesoNomina = B.IdProcesoNomina and N.IdComprobanteNomina = B.IdComprobanteNomina and B.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda and N.IdTipoVehiculo = R.IdTipoVehiculo),0)
 	from #TMP_ReporteComparativoPagos R
+
+	update #TMP_ReporteComparativoPagos set 
+		DescuentoSted			= isnull(iif( isnull(B.STED,0) > 0,  B.STED * (CP.Dias / B.Dias), 0 ), 0)
+	from #TMP_ReporteComparativoPagos CP, #TMP_Base B
+	where	CP.IdCliente		= B.IdCliente
+		and CP.IdCoordinador	= B.IdCoordinador
+		and CP.IdOperador		= B.IdOperador
+		and CP.IdTienda			= B.IdTienda
+		and isnull(CP.Dias,0)	> 0
+
+	update #TMP_ReporteComparativoPagos set 
+		Total			= isnull(TarifaVehiculo,0) + isnull(Salario,0) + isnull(Gasolina,0) - isnull(DescuentoSted,0)
+
+	update #TMP_ReporteComparativoPagos set 
+		TotalGeneral	= Dias * Total
 
 	--##############################################################################################
 	--#### SALIDA
