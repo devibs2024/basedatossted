@@ -5,10 +5,10 @@
 -- Descripción:		Stored Procedure | Reporte de Vehículos Extra
 /*==================================================================================================*/
 
-CREATE PROCEDURE [dbo].[ReporteVehiculosExtra]
+CREATE PROCEDURE [dbo].[ReporteComparativoPagos]
 
 @IdCoordinador					INT					= NULL,
-@IdCliente						INT					= NULL,
+@IdOperador						INT					= NULL,
 @IdTienda						INT					= NULL,
 @IdTipoVehiculo					INT					= NULL,
 
@@ -38,20 +38,20 @@ begin try
 	---### DEFAULT
 	
 	set @IdCoordinador			= iif(isnull(@IdCoordinador,0) <= 0, null, @IdCoordinador)
-	set @IdCliente				= iif(isnull(@IdCliente,0) <= 0, null, @IdCliente)
+	set @IdOperador				= iif(isnull(@IdOperador,0) <= 0, null, @IdOperador)
 	set @IdTienda				= iif(isnull(@IdTienda,0) <= 0, null, @IdTienda)
 	set @IdTipoVehiculo			= iif(isnull(@IdTipoVehiculo,0) <= 0, null, @IdTipoVehiculo)
 
     --##############################################################################################
 	--# TABLAS TEMPORALES
 	
-	if object_id('tempdb..#TMP_Dias')					is not null drop table #TMP_Dias
-	if object_id('tempdb..#TMP_Procesos')				is not null drop table #TMP_Procesos
-	if object_id('tempdb..#TMP_Ejecucion')				is not null drop table #TMP_Ejecucion
-	if object_id('tempdb..#TMP_CalculoNomina')			is not null drop table #TMP_Base
-	if object_id('tempdb..#TMP_ReporteVehiculosExtra')	is not null drop table #TMP_ReporteVehiculosExtra
+	if object_id('tempdb..#TMP_Dias')						is not null drop table #TMP_Dias
+	if object_id('tempdb..#TMP_Procesos')					is not null drop table #TMP_Procesos
+	if object_id('tempdb..#TMP_Ejecucion')					is not null drop table #TMP_Ejecucion
+	if object_id('tempdb..#TMP_CalculoNomina')				is not null drop table #TMP_Base
+	if object_id('tempdb..#TMP_ReporteComparativoPagos')	is not null drop table #TMP_ReporteComparativoPagos
 
-	if object_id('tempdb..#TMP_Dias')					is null begin
+	if object_id('tempdb..#TMP_Dias')						is null begin
 
 		create table #TMP_Dias
 		(
@@ -62,7 +62,6 @@ begin try
 			[Spot]						INT,
 			[Tot]						INT
 		)
-		
 
 	end
 
@@ -82,7 +81,7 @@ begin try
 
 	end
 
-	if object_id('tempdb..#TMP_Ejecucion')				is null begin
+	if object_id('tempdb..#TMP_Ejecucion')					is null begin
 
 		create table #TMP_Ejecucion
 		(
@@ -101,13 +100,13 @@ begin try
 			[IdTipoVehiculo]           INT,
 			[IdTarjeta]                BIGINT,
 
-			[MontoCombustible]         DECIMAL (18, 2) NULL
+			[MontoCombustible]         DECIMAL (18, 2)
 		)
 		
 
 	end
 
-	if object_id('tempdb..#TMP_Base')					is null begin
+	if object_id('tempdb..#TMP_Base')						is null begin
 
 		create table #TMP_Base
 		(
@@ -161,9 +160,9 @@ begin try
 
 	end
 
-	if object_id('tempdb..#TMP_ReporteVehiculosExtra')	is null begin
+	if object_id('tempdb..#TMP_ReporteComparativoPagos')	is null begin
 
-		create table #TMP_ReporteVehiculosExtra
+		create table #TMP_ReporteComparativoPagos
 		(    
 			
 			Row							BIGINT,
@@ -174,19 +173,39 @@ begin try
 			IdCliente					BIGINT,				
 			Cliente						VARCHAR(250),
 
+			IdOperador					BIGINT,				
+			Operador					VARCHAR(250),
+
 			IdTienda					BIGINT,				
 			Tienda						VARCHAR(250),
+
+			IdZonaSted					BIGINT,				
+			ZonaSted					VARCHAR(50),
+
+			IdEstado					BIGINT,				
+			Estado						VARCHAR(50),			
 
 			IdTipoVehiculo				BIGINT,
 			TipoVehiculo				VARCHAR(250),
 
-			UnidadesSpot				INT,
-			TotalUnidadesSolicitadas	INT,
-			TotalUnidadesSpot			INT,			
-			TotalUnidades				INT,			
-			TotalUnidadesGeneral		INT,
+			NoUnidades					INT,
+			Dias						INT,
 
-			JsonUnidades				NVARCHAR(MAX),
+			TarifaCliente				DECIMAL(19,6),
+			TarifaAyudante				DECIMAL(19,6),
+			TarifaHoraExtra				DECIMAL(19,6),
+
+			UnidadesSpot				INT,
+			TarifaSpot					DECIMAL(19,6),
+
+			TotalCliente				DECIMAL(19,6),
+
+			TarifaVehiculo				DECIMAL(19,6),
+			Salario						DECIMAL(19,6),
+			Gasolina					DECIMAL(19,6),
+			DescuentoSted				DECIMAL(19,6),
+			Total						DECIMAL(19,6),
+			TotalGeneral				DECIMAL(19,6),
 
 			Accion						VARCHAR(50)	
 		)
@@ -247,6 +266,14 @@ begin try
 
 	if isnull(@IdCoordinador,0) > 0		set @SQL += char(13) + ' and PN.IdCoordinador		= ' + dbo.funStrInt(@IdCoordinador)
 
+	if isDate(@FechaIni) = 1 and isDate(@FechaEnd) = 1 begin
+		Select @SQL += char(13) + ' and PN.Fecha >= ''' + dbo.funFechaStr(@FechaIni, 20, '-') + ''' and PN.Fecha <= ''' + dbo.funFechaStr(@FechaEnd, 20, '-') + ' 23:59'''
+	end else if isDate(@FechaIni) = 1 and not isDate(@FechaEnd) = 1 begin
+		Select @SQL += char(13) + ' and PN.Fecha >= ''' + dbo.funFechaStr(@FechaIni, 20, '-') + ''''
+	end else if not isDate(@FechaIni) = 1 and isDate(@FechaEnd) = 1 begin
+		Select @SQL += char(13) + ' and PN.Fecha <= ''' + dbo.funFechaStr(@FechaEnd, 20, '-') + ' 23:59'''
+	end
+
 	print(@SQL)
 	exec(@SQL)
 
@@ -268,7 +295,7 @@ begin try
 	set @SQL += char(13) + '	[IdTipoVehiculo],				'
 	set @SQL += char(13) + '	[IdTarjeta],					'
 	set @SQL += char(13) + ''							   
-	set @SQL += char(13) + '	[MontoCombustible]				'
+	set @SQL += char(13) + '	EP.[MontoCombustible]			'
 	set @SQL += char(13) + ')'
 	set @SQL += char(13) + 'select'
 	set @SQL += char(13) + '	EP.[IdProcesoNomina],			'
@@ -298,19 +325,12 @@ begin try
 	--*** FILTROS
 
 	if isnull(@IdCoordinador,0) > 0		set @SQL += char(13) + ' and P.IdCoordinador		= ' + dbo.funStrInt(@IdCoordinador)
+	if isnull(@IdOperador,0) > 0		set @SQL += char(13) + ' and EP.IdOperador			= ' + dbo.funStrInt(@IdOperador)
 	if isnull(@IdTienda,0) > 0			set @SQL += char(13) + ' and EP.IdTienda			= ' + dbo.funStrInt(@IdTienda)
 	if isnull(@IdTipoVehiculo,0) > 0	set @SQL += char(13) + ' and EP.IdTipoVehiculo		= ' + dbo.funStrInt(@IdTipoVehiculo)
 
-	if isDate(@FechaIni) = 1 and isDate(@FechaEnd) = 1 begin
-		Select @SQL += char(13) + ' and EP.Fecha >= ''' + dbo.funFechaStr(@FechaIni, 20, '-') + ''' and EP.Fecha <= ''' + dbo.funFechaStr(@FechaEnd, 20, '-') + ' 23:59'''
-	end else if isDate(@FechaIni) = 1 and not isDate(@FechaEnd) = 1 begin
-		Select @SQL += char(13) + ' and EP.Fecha >= ''' + dbo.funFechaStr(@FechaIni, 20, '-') + ''''
-	end else if not isDate(@FechaIni) = 1 and isDate(@FechaEnd) = 1 begin
-		Select @SQL += char(13) + ' and EP.Fecha <= ''' + dbo.funFechaStr(@FechaEnd, 20, '-') + ' 23:59'''
-	end
-
 	print(@SQL)
-	exec(@SQL)
+	exec(@SQL)	
 
 	delete from #TMP_Ejecucion where IdProcesoNomina not in (select IdProcesoNomina from #TMP_Procesos)
 
@@ -390,13 +410,12 @@ begin try
 		CN.Accion
 	from tbl_ComprobanteNomina CN with(NoLock), #TMP_Procesos PN
 	where	CN.IdProcesoNomina		= PN.IdProcesoNomina
-		and CN.IdCliente			= isnull(@IdCliente, CN.IdCliente)
-		and CN.IdComprobanteNomina	in (select IdComprobanteNomina from #TMP_Ejecucion)
+		and CN.IdComprobanteNomina	in (select IdComprobanteNomina from #TMP_Ejecucion)	
 
 	--##############################################################################################
 	--### CALCULOS
 		
-	insert into #TMP_ReporteVehiculosExtra
+	insert into #TMP_ReporteComparativoPagos
 	(
 		Row,
 
@@ -405,6 +424,9 @@ begin try
 
 		IdCliente,
 		Cliente,
+
+		IdOperador,					
+		Operador,	
 
 		IdTienda,					
 		Tienda,						
@@ -422,6 +444,9 @@ begin try
 		B.IdCliente,					
 		B.Cliente,	
 
+		B.IdOperador,					
+		B.Operador,	
+
 		B.IdTienda,					
 		B.Tienda,	
 
@@ -431,77 +456,90 @@ begin try
 	from #TMP_Ejecucion E, #TMP_Base B
 	where	E.IdProcesoNomina		= B.IdProcesoNomina
 		and E.IdComprobanteNomina	= B.IdComprobanteNomina
-	group by B.IdCoordinador, B.Coordinador, B.IdCliente, B.Cliente, B.IdTienda, B.Tienda, E.IdTipoVehiculo
+	group by B.IdCoordinador, B.Coordinador, B.IdCliente, B.Cliente, B.IdOperador, B.Operador, B.IdTienda, B.Tienda, E.IdTipoVehiculo
 
-	update #TMP_ReporteVehiculosExtra set
-		TipoVehiculo = TV.TipoVehiculo
-	from #TMP_ReporteVehiculosExtra TG, tbl_CatalogoTipoVehiculo TV
+	update #TMP_ReporteComparativoPagos set
+		NoUnidades			= 0,
+		Dias				= 0,
+		TarifaCliente		= 0,
+		TarifaAyudante		= 0,
+		TarifaHoraExtra		= 0,
+		UnidadesSpot		= 0,
+		TotalCliente		= 0,
+		TarifaVehiculo		= 0,
+		Salario				= 0,
+		Gasolina			= 0,
+		DescuentoSted		= 0,
+		Total				= 0,
+		TotalGeneral		= 0
+
+	update #TMP_ReporteComparativoPagos set
+		TipoVehiculo		= TV.TipoVehiculo
+	from #TMP_ReporteComparativoPagos TG, tbl_CatalogoTipoVehiculo TV
 	where TG.IdTipoVehiculo	= TV.IdTipoVehiculo
 
-	update #TMP_ReporteVehiculosExtra set
-		UnidadesSpot				= 0,
-		TotalUnidadesSolicitadas	= 0,	
-		TotalUnidadesSpot			= 0,
-		TotalUnidades				= 0,
-		TotalUnidadesGeneral		= 0,
-		JsonUnidades				= ''
+	update #TMP_ReporteComparativoPagos set
+		TarifaVehiculo		= TTV.Tarifa
+	from #TMP_ReporteComparativoPagos TG, tbl_TarifasTipoVehiculo TTV
+	where TG.IdTipoVehiculo	= TTV.IdTipoVehiculo
+		and isnull(TTV.Principal,0) = 1
+		and isnull(TTV.IsDeleted,0)	= 0
 
-	declare _CursorRow insensitive cursor for
-	select Row, IdCoordinador, IdCliente, IdTienda, IdTipoVehiculo
-	from #TMP_ReporteVehiculosExtra
-	open _CursorRow
-	fetch next from _CursorRow into @Row, @IdCoordinadorRow, @IdClienteRow, @IdTiendaRow, @IdTipoVehiculoRow
-	while @@fetch_status = 0  begin   
-
-		update #TMP_Dias set
-			Sol		= 0,
-			Spot	= 0,
-			Tot		= 0
-
-		update #TMP_Dias set
-			Sol =	(select count(-1) from #TMP_Ejecucion E, #TMP_Base B where E.IdProcesoNomina = B.IdProcesoNomina and E.IdComprobanteNomina = B.IdComprobanteNomina and B.IdCliente = @IdClienteRow and D.Anio = year(E.Fecha) and D.Mes = month(E.Fecha) and D.Dia = day(E.Fecha) and B.IdCoordinador = @IdCoordinadorRow and E.IdTienda = @IdTiendaRow and E.IdTipoVehiculo = @IdTipoVehiculoRow and B.Spot = 0),
-			Spot =	(select count(-1) from #TMP_Ejecucion E, #TMP_Base B where E.IdProcesoNomina = B.IdProcesoNomina and E.IdComprobanteNomina = B.IdComprobanteNomina and B.IdCliente = @IdClienteRow and D.Anio = year(E.Fecha) and D.Mes = month(E.Fecha) and D.Dia = day(E.Fecha) and B.IdCoordinador = @IdCoordinadorRow and E.IdTienda = @IdTiendaRow and E.IdTipoVehiculo = @IdTipoVehiculoRow and B.Spot = 1)
-		from #TMP_Dias D
-
-		update #TMP_Dias set
-			Tot		= Sol + Spot
-
-		update #TMP_ReporteVehiculosExtra set 
-			TotalUnidadesSolicitadas	= (select sum(Sol) from #TMP_Dias D),
-			TotalUnidadesSpot			= (select sum(Spot) from #TMP_Dias D),
-			TotalUnidades				= (select sum(Tot) from #TMP_Dias D),
-			TotalUnidadesGeneral		= (select sum(Tot) from #TMP_Dias D),
-			JsonUnidades = ((select * from #TMP_Dias order by Anio, Mes, Dia for json auto))
-		where Row = @Row
-
-		fetch next from _CursorRow into @Row, @IdCoordinadorRow, @IdClienteRow, @IdTiendaRow, @IdTipoVehiculoRow
-
-	end
-	close       _CursorRow   
-	deallocate  _CursorRow
-
-	update #TMP_ReporteVehiculosExtra set 
-			UnidadesSpot	= T.CntEmpleadosSpot
-	from #TMP_ReporteVehiculosExtra VE, tbl_Tienda T
+	update #TMP_ReporteComparativoPagos set 
+		UnidadesSpot		= T.CntEmpleadosSpot,
+		IdZonaSted			= T.IdZonaSted,
+		IdEstado			= T.IdEstado
+	from #TMP_ReporteComparativoPagos VE, tbl_Tienda T with(NoLock)
 	where VE.IdTienda	= T.IdTienda
+
+	update #TMP_ReporteComparativoPagos set
+		ZonaSted			= ZS.NombreZona
+	from #TMP_ReporteComparativoPagos N, tbl_ZonaSted ZS with(NoLock)
+	where N.IdZonaSted		= ZS.IdZonaSted
+
+	update #TMP_ReporteComparativoPagos set
+		Estado				= E.NombreEstado
+	from #TMP_ReporteComparativoPagos N, tbl_CatalogoEstado E with(NoLock)
+	where N.IdEstado		= E.IdEstado
+
+	update #TMP_ReporteComparativoPagos set
+		Salario				= E.Salario
+	from #TMP_ReporteComparativoPagos N, tbl_Empleados E with(NoLock)
+	where N.IdOperador		= E.IdEmpleado
+
+	update #TMP_ReporteComparativoPagos set
+		TarifaCliente		= C.Tarifa,
+		TarifaAyudante		= C.TarifaConAyudante,
+		TarifaHoraExtra		= C.TarifaHoraAdicional,
+		TarifaSpot			= C.TarifaSpot
+	from #TMP_ReporteComparativoPagos N, tbl_Cliente c with(NoLock)
+	where N.IdCliente		= C.IdCliente
+
+	update #TMP_ReporteComparativoPagos set 
+		Dias			= isnull((select count(-1)																from #TMP_Ejecucion N, #TMP_Base B	where N.IdProcesoNomina = B.IdProcesoNomina and N.IdComprobanteNomina = B.IdComprobanteNomina and B.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda and N.IdTipoVehiculo = R.IdTipoVehiculo),0),
+		Gasolina		= isnull((select isnull(sum(isnull(MontoCombustible,0)),0)								from #TMP_Ejecucion N, #TMP_Base B	where N.IdProcesoNomina = B.IdProcesoNomina and N.IdComprobanteNomina = B.IdComprobanteNomina and B.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda and N.IdTipoVehiculo = R.IdTipoVehiculo),0)
+	from #TMP_ReporteComparativoPagos R
 
 	--##############################################################################################
 	--#### SALIDA
 
 	select 
 		* 
-	from #TMP_ReporteVehiculosExtra
+	from #TMP_ReporteComparativoPagos
 
+	select * from #TMP_Dias
+	select * from #TMP_Procesos
 	select * from #TMP_Ejecucion
 	select * from #TMP_Base
 
 	--##############################################################################################
 	--#### TABLAS TEMPORALES
 
-	if object_id('tempdb..#TMP_Dias')					is not null drop table #TMP_Dias
-	if object_id('tempdb..#TMP_Ejecucion')				is not null drop table #TMP_Ejecucion
-	if object_id('tempdb..#TMP_Base')					is not null drop table #TMP_Base
-	if object_id('tempdb..#TMP_ReporteVehiculosExtra')	is not null drop table #TMP_ReporteVehiculosExtra
+	if object_id('tempdb..#TMP_Dias')						is not null drop table #TMP_Dias
+	if object_id('tempdb..#TMP_Procesos')					is not null drop table #TMP_Procesos
+	if object_id('tempdb..#TMP_Ejecucion')					is not null drop table #TMP_Ejecucion
+	if object_id('tempdb..#TMP_Base')						is not null drop table #TMP_Base
+	if object_id('tempdb..#TMP_ReporteComparativoPagos')	is not null drop table #TMP_ReporteComparativoPagos
 
 end try
 begin catch
