@@ -325,10 +325,10 @@ begin try
 	--### RESUMEN | CALCULOS
 		
 	update #TMP_ComprobanteNomina set 
-		Dias		= isnull((select count(-1)																from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda),0),
-		Descuento	= isnull((select isnull(sum(isnull(DescuentoTardanza,0)),0)								from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda),0),
-		Bono		= isnull((select isnull(sum(isnull(MontoHorasExtras,0) + isnull(IncentivoFactura,0)),0) from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda),0),
-		Gasolina	= isnull((select isnull(sum(isnull(MontoCombustible,0)),0)								from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda),0)
+		Dias		= isnull((select count(-1)																		from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda),0),
+		Descuento	= isnull((select isnull(sum(isnull(DescuentoTardanza,0)),0)										from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda),0),
+		Bono		= isnull((select isnull(sum(isnull(MontoHorasExtras,0) + (isnull(IncentivoFactura,0) * 100)),0) from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda),0),
+		Gasolina	= isnull((select isnull(sum(isnull(MontoCombustible,0)),0)										from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda),0)
 	from #TMP_ComprobanteNomina R
 	
 	update #TMP_ComprobanteNomina set 
