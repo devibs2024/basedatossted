@@ -58,4 +58,5 @@
                   And ((@IdZonaSted Is Null) Or (tda.IdZonaSted = @IdZonaSted))  
                   And ((@IdCoordinador Is Null) Or (tdacdor.IdCoordinador = @IdCoordinador))
 				  And (tda.IsDeleted = 0)
+                  and (tdacdor.IsDeleted = 0)
             
