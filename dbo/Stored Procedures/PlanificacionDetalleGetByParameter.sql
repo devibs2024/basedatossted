@@ -74,6 +74,7 @@
 							On cte.IdZona = zna.IdZona				
 				Where pln.IdPlanificacion = @IdPlanificacion
 				And ((@IdDetallePlanificacion Is Null) Or (dtPln.IdDetallePlanificacion = @IdDetallePlanificacion))
+				and isnull(dtPln.IsDeleted,0) = 0
             
 
 
