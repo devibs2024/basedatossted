@@ -66,7 +66,7 @@ begin try
 
 	end
 
-	if object_id('tempdb..#TMP_Procesos')					is null begin
+	if object_id('tempdb..#TMP_Procesos')				is null begin
 
 		create table #TMP_Procesos
 		(

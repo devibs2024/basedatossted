@@ -28,6 +28,7 @@ declare @Reg					int
 
 declare @IdProcesoNomina		DECIMAL (18)
 declare @Fecha					datetime
+declare @Dias					int
 
 begin try
 
@@ -43,8 +44,23 @@ begin try
     --##############################################################################################
 	--# TABLAS TEMPORALES
 	
+	if object_id('tempdb..#TMP_Dias')				is not null drop table #TMP_Dias
 	if object_id('tempdb..#TMP_CalculoNomina')		is not null drop table #TMP_CalculoNomina
 	if object_id('tempdb..#TMP_ComprobanteNomina')	is not null drop table #TMP_ComprobanteNomina
+
+	if object_id('tempdb..#TMP_Dias')				is null begin
+
+		create table #TMP_Dias
+		(
+			[Anio]						INT,
+			[Mes]						INT,
+			[Dia]						INT,
+			[Sol]						INT,
+			[Spot]						INT,
+			[Tot]						INT
+		)
+
+	end
 
 	if object_id('tempdb..#TMP_CalculoNomina')		is null begin
 
@@ -71,6 +87,7 @@ begin try
 			DescuentoTardanza			DECIMAL(19,6),
 			MontoHorasExtras			DECIMAL(19,6),
 			MontoCombustible			DECIMAL(19,6),
+			Descanso					BIT,
 
 			Accion						VARCHAR(50),		
 		)
@@ -108,6 +125,30 @@ begin try
 	--##############################################################################################
 	--#### DATA | DETALLE DE NOMINA
 	
+	set @Fecha = @FechaIni
+	while @Fecha <= @FechaEnd begin
+
+		insert into #TMP_Dias
+		(
+			Anio,
+			Mes,
+			Dia,
+			Sol,
+			Spot,
+			Tot
+		)
+		select	
+			year(@Fecha),
+			month(@Fecha),
+			day(@Fecha),
+			0,
+			0,
+			0
+
+		set @Fecha = dateadd(day, 1, @Fecha)
+
+	end
+
 	set @SQL = '' 
 	set @SQL += char(13) + 'insert into #TMP_CalculoNomina'
 	set @SQL += char(13) + '('
@@ -125,7 +166,8 @@ begin try
 	set @SQL += char(13) + '	[IncentivoFactura],'
 	set @SQL += char(13) + '	[DescuentoTardanza],'
 	set @SQL += char(13) + '	[MontoHorasExtras],'
-	set @SQL += char(13) + '	[MontoCombustible]'
+	set @SQL += char(13) + '	[MontoCombustible],'
+	set @SQL += char(13) + '	[Descanso]'
 	set @SQL += char(13) + ')'
 	
 	set @SQL += char(13) + 'select '
@@ -142,7 +184,8 @@ begin try
 	set @SQL += char(13) + '	EP.[IncentivoFactura],'
 	set @SQL += char(13) + '	EP.[DescuentoTardanza],'
 	set @SQL += char(13) + '	EP.[MontoHorasExtras],'
-	set @SQL += char(13) + '	EP.[MontoCombustible]'
+	set @SQL += char(13) + '	EP.[MontoCombustible],'
+	set @SQL += char(13) + '	EP.[Descanso]'
 	set @SQL += char(13) + 'from tbl_EjecucionPlanificacion EP with(NoLock), tbl_DetallePlanificacion DP with(NoLock), tbl_Planificacion P with(NoLock)'
 	set @SQL += char(13) + 'where	EP.IdDetallePlanificacion			= DP.IdDetallePlanificacion and EP.IdPlanificacion = DP.IdPlanificacion'
 	set @SQL += char(13) + '	and DP.IdPlanificacion					= P.IdPlanificacion'
@@ -324,8 +367,12 @@ begin try
 	--##############################################################################################
 	--### RESUMEN | CALCULOS
 		
+	select @Dias = count(-1) from #TMP_Dias
+
 	update #TMP_ComprobanteNomina set 
-		Dias		= isnull((select count(-1)																		from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda),0),
+		Dias		= isnull((select count(-1)																		from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda and isnull(N.Descanso,0) = 0),0),
+		Descansos	= isnull((select count(-1)																		from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda and isnull(N.Descanso,0) = 1),0),
+		Faltas		= @Dias - isnull((select count(-1)																from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda and isnull(N.Descanso,0) = 0),0),
 		Descuento	= isnull((select isnull(sum(isnull(DescuentoTardanza,0)),0)										from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda),0),
 		Bono		= isnull((select isnull(sum(isnull(MontoHorasExtras,0) + (isnull(IncentivoFactura,0) * 100)),0) from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda),0),
 		Gasolina	= isnull((select isnull(sum(isnull(MontoCombustible,0)),0)										from #TMP_CalculoNomina N where N.IdCoordinador = R.IdCoordinador and N.IdOperador = R.IdOperador and N.IdTienda = R.IdTienda),0)
@@ -384,6 +431,8 @@ begin try
 		ZonaSted,
 	
 		Dias,
+		Descansos,
+		Faltas,
 	
 		SubTotal1,
 		Descuento,
@@ -430,6 +479,8 @@ begin try
 		ZonaSted,
 	
 		Dias,
+		Descansos,
+		Faltas,
 	
 		SubTotal1,
 		Descuento,
@@ -465,6 +516,7 @@ begin try
 	--##############################################################################################
 	--#### TABLAS TEMPORALES
 
+	if object_id('tempdb..#TMP_Dias')				is not null drop table #TMP_Dias
 	if object_id('tempdb..#TMP_CalculoNomina')		is not null drop table #TMP_CalculoNomina
 	if object_id('tempdb..#TMP_ComprobanteNomina')	is not null drop table #TMP_ComprobanteNomina
 

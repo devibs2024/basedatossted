@@ -39,6 +39,8 @@
 			
 	--*** DATA
 	Dias						INT,
+	Descansos					INT,
+	Faltas						INT,
 			
 	SubTotal1					DECIMAL(19,6),
 	Descuento					DECIMAL(19,6),
