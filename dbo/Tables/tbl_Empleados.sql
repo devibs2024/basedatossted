@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tbl_Empleados] (
     [IdEmpleado]      BIGINT          IDENTITY (1, 1) NOT NULL,
-    [NumeroContrato]  NUMERIC (18)    NOT NULL,
+    [NumeroContrato]  VARCHAR(100)    NULL,
     [Nombres]         NVARCHAR (30)   NOT NULL,
     [ApellidoMaterno] NVARCHAR (20)   NULL,
     [ApellidoPaterno] NVARCHAR (20)   NULL,
